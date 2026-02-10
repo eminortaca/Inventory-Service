@@ -4,8 +4,16 @@ services:
     image: postgres:15
     environment:
       - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=inventorydb
+      - POSTGRES_INITDB_ARGS=-c create_if_missing=true
     ports:
       - "5432:5432"
+    networks:
+      - microservices-network
+    command:
+      - "sh"
+      - "-c"
+      - "createdb -U postgres inventorydb 2>/dev/null || true && postgres"
 
   inventory-service:
     build: ./inventory-service
@@ -13,8 +21,22 @@ services:
       - "8081:8080"
     depends_on:
       - inventory-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://inventory-db:5432/inventorydb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - microservices-network
 
   order-service:
     build: ./order-service
     ports:
-      - "8082:8080"
+      - "8082:8081"
+    depends_on:
+      - inventory-service
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
