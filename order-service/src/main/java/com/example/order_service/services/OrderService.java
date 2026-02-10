@@ -41,7 +41,7 @@ public class OrderService {
 
         // 2. Inventory Service'i çağır (Senkron iletişim)
         InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
-                .uri("http://127.0.0.1:8080/api/inventory",
+                .uri("http://inventory-service:8080/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
